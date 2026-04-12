@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocBridge - Book your Doctor Appointment</title>
+    <link rel="stylesheet" href="style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body class="patient-theme">
+    <nav>
+        <a href="index.html" class="logo"><i class='bx bx-plus-medical'></i> DocBridge</a>
+        <div class="nav-links">
+            <a href="index.html">Home</a>
+            <a href="login.html" class="btn btn-outline" style="padding: 0.6rem 1.25rem;">Login</a>
+            <a href="register.html" class="btn btn-primary" style="padding: 0.6rem 1.25rem;">Get Started</a>
+        </div>
+    </nav>
+
+    <div class="blob" style="width: 500px; height: 500px; background: #60A5FA; top: -10%; left: -10%;"></div>
+    <div class="blob" style="width: 400px; height: 400px; background: #818CF8; bottom: 20%; right: -5%;"></div>
+
+    <section class="container" style="display: flex; align-items: center; min-height: 85vh; gap: 4rem; position: relative; z-index: 2;">
+        <div style="flex: 1;">
+            <div class="badge badge-pending" style="margin-bottom: 1.5rem; background: rgba(96, 165, 250, 0.2); border-color: rgba(96, 165, 250, 0.4); color: var(--pat-primary);">🚀 Transforming Healthcare</div>
+            <h1 style="font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; color: var(--gray-900);">Fast, Secure & <br><span style="color: var(--pat-primary);">Intelligent</span> Care.</h1>
+            <p style="font-size: 1.25rem; color: var(--gray-500); margin-bottom: 2.5rem; line-height: 1.6;">Book appointments, manage your health, and connect with top-tier verified medical professionals. Powered by AI symptom analysis.</p>
+            <div style="display: flex; gap: 1rem;">
+                <a href="register.html" class="btn btn-primary" style="padding: 1rem 2rem; font-size: 1.1rem;">Book Appointment</a>
+                <a href="#features" class="btn btn-outline" style="padding: 1rem 2rem; font-size: 1.1rem; background: var(--white);">Explore Features</a>
+            </div>
+            
+            <div style="margin-top: 3rem; display: flex; gap: 2rem; align-items: center;">
+                <div>
+                    <h3 style="font-size: 1.75rem; color: var(--pat-primary); font-weight: 800;">10k+</h3>
+                    <p class="text-muted">Active Patients</p>
+                </div>
+                <div style="width: 1px; height: 40px; background: var(--gray-200);"></div>
+                <div>
+                    <h3 style="font-size: 1.75rem; color: var(--doc-primary); font-weight: 800;">500+</h3>
+                    <p class="text-muted">Verified Doctors</p>
+                </div>
+            </div>
+        </div>
+        <div style="flex: 1; position: relative; display: flex; justify-content: flex-end;">
+            <div class="glass" style="padding: 2.5rem; border-radius: var(--radius-lg); position: relative; z-index: 2; transform: rotate(2deg); width: 100%; max-width: 450px;">
+                <!-- Abstract Dashboard Graphic -->
+                <svg width="100%" height="320" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Header -->
+                    <rect x="0" y="0" width="120" height="20" rx="10" fill="#E2E8F0"/>
+                    <rect x="360" y="0" width="40" height="40" rx="20" fill="#DBEAFE"/>
+                    <!-- AI Card -->
+                    <rect x="0" y="60" width="400" height="80" rx="15" fill="#312E81"/>
+                    <rect x="20" y="80" width="200" height="15" rx="7.5" fill="white" fill-opacity="0.5"/>
+                    <rect x="20" y="105" width="150" height="10" rx="5" fill="white" fill-opacity="0.2"/>
+                    <rect x="300" y="80" width="80" height="40" rx="20" fill="#4F46E5"/>
+                    <!-- Doctor Cards -->
+                    <rect x="0" y="160" width="190" height="110" rx="15" fill="white" stroke="#E2E8F0" stroke-width="2"/>
+                    <circle cx="30" cy="190" r="15" fill="#DBEAFE"/>
+                    <rect x="55" y="180" width="80" height="10" rx="5" fill="#94A3B8"/>
+                    <rect x="55" y="195" width="50" height="8" rx="4" fill="#CBD5E1"/>
+                    <rect x="20" y="235" width="150" height="20" rx="10" fill="#3B82F6"/>
+
+                    <rect x="210" y="160" width="190" height="110" rx="15" fill="white" stroke="#E2E8F0" stroke-width="2"/>
+                    <circle cx="240" cy="190" r="15" fill="#CCFBF1"/>
+                    <rect x="265" y="180" width="80" height="10" rx="5" fill="#94A3B8"/>
+                    <rect x="265" y="195" width="50" height="8" rx="4" fill="#CBD5E1"/>
+                    <rect x="230" y="235" width="150" height="20" rx="10" fill="#0D9488"/>
+                </svg>
+            </div>
+            <!-- Decorative dots -->
+            <svg width="100" height="100" viewBox="0 0 100 100" style="position: absolute; top: -20px; left: -20px; z-index: 1;" fill="none">
+                <pattern id="dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="2" fill="#94A3B8" opacity="0.4"/>
+                </pattern>
+                <rect width="100" height="100" fill="url(#dots)"/>
+            </svg>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" style="background: var(--white); padding: 6rem 5%; position: relative; z-index: 2;">
+        <div style="max-width: 1280px; margin: 0 auto;">
+            <div style="text-align: center; margin-bottom: 4rem;">
+                <h2 style="font-size: 2.5rem; font-weight: 800; color: var(--gray-900);">Why Choose DocBridge?</h2>
+                <p style="color: var(--gray-500); font-size: 1.15rem; max-width: 600px; margin: 1rem auto 0;">Experience the absolute next generation of healthcare management interfaces.</p>
+            </div>
+            
+            <div class="grid">
+                <div class="card glass" style="text-align: center; background: rgba(255,255,255,0.9); border-color: rgba(96, 165, 250, 0.3);">
+                    <div class="icon-box" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; font-size: 2.5rem;"><i class='bx bx-calendar-check'></i></div>
+                    <h3 class="card-title">Smart Booking</h3>
+                    <p class="text-muted mt-2">Zero double-bookings. Our smart grid precisely allocates available slots across the calendar.</p>
+                </div>
+                <div class="card glass" style="text-align: center; background: rgba(255,255,255,0.9); border-color: rgba(20, 184, 166, 0.3);">
+                    <div class="icon-box" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; font-size: 2.5rem; background: var(--doc-bg); color: var(--doc-primary);"><i class='bx bx-check-shield'></i></div>
+                    <h3 class="card-title">Verified Doctors</h3>
+                    <p class="text-muted mt-2">Connecting you securely only with meticulously vetted and trusted medical professionals.</p>
+                </div>
+                <div class="card glass" style="text-align: center; background: rgba(255,255,255,0.9); border-color: rgba(147, 51, 234, 0.3);">
+                    <div class="icon-box" style="margin: 0 auto 1.5rem; width: 64px; height: 64px; font-size: 2.5rem; background: #F3E8FF; color: #9333EA;"><i class='bx bx-bot'></i></div>
+                    <h3 class="card-title">AI Symptoms</h3>
+                    <p class="text-muted mt-2">Describe what's wrong, and our Gemini AI engine instantly directs you to the perfect specialist.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="text-align: center; padding: 2.5rem; background: var(--gray-900); color: var(--gray-500); margin-top: auto; position: relative; z-index: 2;">
+        <p>&copy; 2026 DocBridge Inc. All rights reserved.</p>
+    </footer>
+</body>
+</html>

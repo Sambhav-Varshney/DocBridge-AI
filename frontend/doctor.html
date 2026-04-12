@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - DocBridge</title>
+    <meta name="description" content="Manage patient appointment requests with DocBridge.">
+    <link rel="stylesheet" href="style.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        .req-card {
+            position: relative; overflow: hidden;
+            border-left: 4px solid var(--doc-accent);
+            transition: all 0.25s ease;
+        }
+        .req-card.approved { border-left-color: #10B981; }
+        .req-card.rejected { border-left-color: #EF4444; }
+        .req-card.pending { border-left-color: #F59E0B; }
+
+        .patient-avatar {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: linear-gradient(135deg, #CCFBF1, #F0FDFA);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.25rem; font-weight: 700; color: var(--doc-primary); flex-shrink: 0;
+        }
+        .info-chip {
+            display: flex; align-items: center; gap: 8px;
+            background: var(--doc-bg); border-radius: var(--radius-sm);
+            padding: 0.6rem 0.875rem; font-size: 0.875rem; color: var(--gray-800);
+        }
+        .info-chip i { color: var(--doc-primary); font-size: 1rem; }
+
+        .stat-strip {
+            display: flex; gap: 1.5rem; margin-bottom: 3rem;
+            padding: 1.5rem 2rem;
+            background: var(--white);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(13,148,136,0.2);
+            box-shadow: var(--shadow-sm);
+        }
+        .stat-item { text-align: center; flex: 1; }
+        .stat-item h3 { font-size: 2rem; font-weight: 800; color: var(--doc-primary); }
+        .stat-item p { font-size: 0.85rem; color: var(--gray-500); margin-top: 0.25rem; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="doctor-theme" style="min-height: 100vh;">
+    <div class="bg-mesh-doctor"></div>
+
+    <nav class="glass">
+        <a href="index.html" class="logo"><i class='bx bx-plus-medical'></i> DocBridge</a>
+        <div class="nav-links">
+            <span style="display: flex; align-items: center; gap: 10px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--doc-primary), var(--doc-accent)); display: flex; align-items: center; justify-content: center; color: white;">
+                    <i class='bx bx-user-md' style="font-size: 1.2rem;"></i>
+                </div>
+                <div>
+                    <div id="userNameDisplay" style="font-weight: 700; color: var(--gray-900); font-size: 0.95rem;"></div>
+                    <div style="font-size: 0.75rem; color: var(--doc-primary); font-weight: 600;">Doctor</div>
+                </div>
+            </span>
+            <button onclick="logout()" class="btn btn-outline" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">
+                <i class='bx bx-log-out'></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Page Header -->
+        <div style="margin-bottom: 2.5rem;">
+            <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--gray-900); margin-bottom: 0.35rem;">Doctor Dashboard</h1>
+            <p class="text-muted" style="font-size: 1.05rem;">Review and manage incoming patient appointment requests.</p>
+        </div>
+
+        <!-- Stats Strip -->
+        <div class="stat-strip" id="statStrip" style="display: none;">
+            <div class="stat-item">
+                <h3 id="totalCount">0</h3>
+                <p><i class='bx bx-calendar'></i> Total</p>
+            </div>
+            <div style="width: 1px; background: var(--gray-200);"></div>
+            <div class="stat-item">
+                <h3 id="pendingCount" style="color: #F59E0B;">0</h3>
+                <p><i class='bx bx-time-five'></i> Pending</p>
+            </div>
+            <div style="width: 1px; background: var(--gray-200);"></div>
+            <div class="stat-item">
+                <h3 id="approvedCount" style="color: #10B981;">0</h3>
+                <p><i class='bx bx-check-circle'></i> Approved</p>
+            </div>
+            <div style="width: 1px; background: var(--gray-200);"></div>
+            <div class="stat-item">
+                <h3 id="rejectedCount" style="color: #EF4444;">0</h3>
+                <p><i class='bx bx-x-circle'></i> Rejected</p>
+            </div>
+        </div>
+
+        <!-- Appointment Requests -->
+        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--gray-500); margin-bottom: 1.5rem;">
+            <i class='bx bx-list-ul'></i>&nbsp; Appointment Requests
+        </div>
+        <div class="grid" id="requestsGrid">
+            <div class="card" style="text-align: center; padding: 3rem; grid-column: 1/-1;">
+                <i class='bx bx-loader-alt' style="font-size: 2.5rem; color: var(--doc-primary); animation: spin 1s linear infinite;"></i>
+                <p class="text-muted" style="margin-top: 1rem;">Loading appointment requests...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!token || user.role !== 'doctor') {
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('userNameDisplay').innerText = `Dr. ${user.fullName}`;
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'login.html';
+        }
+
+        async function fetchRequests() {
+            try {
+                const response = await fetch('/api/appointments/doctor', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const appointments = await response.json();
+                const grid = document.getElementById('requestsGrid');
+                grid.innerHTML = '';
+
+                if (appointments.length === 0) {
+                    grid.innerHTML = `
+                        <div class="card" style="text-align: center; padding: 4rem; border: 2px dashed var(--gray-200); grid-column: 1/-1; background: transparent;">
+                            <i class='bx bx-calendar-x' style="font-size: 3.5rem; color: var(--gray-200);"></i>
+                            <p style="font-size: 1.1rem; font-weight: 600; color: var(--gray-500); margin-top: 1rem;">No appointment requests yet</p>
+                            <p class="text-muted" style="font-size: 0.9rem;">When patients book appointments with you, they will appear here.</p>
+                        </div>`;
+                    return;
+                }
+
+                // Update stats
+                const total = appointments.length;
+                const pending = appointments.filter(a => a.status === 'PENDING').length;
+                const approved = appointments.filter(a => a.status === 'APPROVED').length;
+                const rejected = appointments.filter(a => a.status === 'REJECTED').length;
+                document.getElementById('totalCount').innerText = total;
+                document.getElementById('pendingCount').innerText = pending;
+                document.getElementById('approvedCount').innerText = approved;
+                document.getElementById('rejectedCount').innerText = rejected;
+                document.getElementById('statStrip').style.display = 'flex';
+
+                appointments.forEach(app => {
+                    let badgeClass = 'badge-pending', statusClass = 'pending';
+                    if (app.status === 'APPROVED') { badgeClass = 'badge-approved'; statusClass = 'approved'; }
+                    if (app.status === 'REJECTED') { badgeClass = 'badge-rejected'; statusClass = 'rejected'; }
+
+                    const initials = app.patientName.split(' ').map(n => n[0]).join('').toUpperCase();
+
+                    let actionsHtml = '';
+                    if (app.status === 'PENDING') {
+                        actionsHtml = `
+                            <div style="display: flex; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--gray-200);">
+                                <button class="btn btn-doctor" style="flex: 1;" onclick="updateStatus(${app.id}, 'APPROVED')">
+                                    <i class='bx bx-check'></i> Approve
+                                </button>
+                                <button class="btn btn-danger" style="flex: 1;" onclick="updateStatus(${app.id}, 'REJECTED')">
+                                    <i class='bx bx-x'></i> Reject
+                                </button>
+                            </div>`;
+                    }
+
+                    grid.innerHTML += `
+                        <div class="card req-card ${statusClass}">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
+                                <div style="display: flex; align-items: center; gap: 0.875rem;">
+                                    <div class="patient-avatar">${initials}</div>
+                                    <div>
+                                        <div class="card-title" style="margin-bottom: 0.2rem;">${app.patientName}</div>
+                                        <div style="font-size: 0.85rem; color: var(--gray-500); display: flex; align-items: center; gap: 5px;">
+                                            <i class='bx bx-envelope' style="color: var(--doc-primary);"></i> ${app.patientEmail}
+                                        </div>
+                                    </div>
+                                </div>
+                                <span class="badge ${badgeClass}">${app.status}</span>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                                <div class="info-chip"><i class='bx bx-calendar'></i> ${app.date}</div>
+                                <div class="info-chip"><i class='bx bx-time-five'></i> ${app.time}</div>
+                            </div>
+                            <div class="info-chip" style="width: 100%;">
+                                <i class='bx bx-message-square-detail'></i> ${app.reason}
+                            </div>
+
+                            ${actionsHtml}
+                        </div>`;
+                });
+            } catch (err) {
+                console.error('Error fetching requests:', err);
+                document.getElementById('requestsGrid').innerHTML = '<p class="text-muted">Failed to load requests.</p>';
+            }
+        }
+
+        async function updateStatus(appId, status) {
+            try {
+                const response = await fetch(`/api/appointments/${appId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status })
+                });
+                if (response.ok) {
+                    fetchRequests();
+                } else {
+                    alert('Error updating status');
+                }
+            } catch (err) {
+                alert('Server error');
+            }
+        }
+
+        fetchRequests();
+    </script>
+</body>
+</html>
