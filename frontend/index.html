@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="style.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563EB'/><path d='M16 7v18M7 16h18' stroke='white' stroke-width='4' stroke-linecap='round'/></svg>">
+    <style>
+        @media (max-width: 768px) {
+            .hero-section { flex-direction: column; }
+        }
+    </style>
 </head>
 <body class="patient-theme">
     <nav>
@@ -22,8 +27,8 @@
     <div class="blob" style="width: 500px; height: 500px; background: #60A5FA; top: -10%; left: -10%;"></div>
     <div class="blob" style="width: 400px; height: 400px; background: #818CF8; bottom: 20%; right: -5%;"></div>
 
-    <section class="container" style="display: flex; align-items: center; min-height: 85vh; gap: 4rem; position: relative; z-index: 2;">
-        <div style="flex: 1;">
+    <section class="container hero-section">
+        <div class="hero-content">
             <div class="badge badge-pending" style="margin-bottom: 1.5rem; background: rgba(96, 165, 250, 0.2); border-color: rgba(96, 165, 250, 0.4); color: var(--pat-primary);">🚀 Transforming Healthcare</div>
             <h1 style="font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; color: var(--gray-900);">Fast, Secure & <br><span style="color: var(--pat-primary);">Intelligent</span> Care.</h1>
             <p style="font-size: 1.25rem; color: var(--gray-500); margin-bottom: 2.5rem; line-height: 1.6;">Book appointments, manage your health, and connect with top-tier verified medical professionals. Powered by AI symptom analysis.</p>

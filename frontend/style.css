@@ -91,9 +91,13 @@ nav {
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
 
-.nav-links { display: flex; gap: 1.5rem; align-items: center; }
-.nav-links a, .nav-links span { text-decoration: none; color: var(--gray-800); font-weight: 500; transition: var(--transition); }
 .nav-links a:hover { color: var(--theme-primary, var(--pat-primary)); }
+
+@media (max-width: 600px) {
+  nav { padding: 1rem 5%; flex-direction: column; gap: 1rem; text-align: center; }
+  .nav-links { gap: 1rem; flex-wrap: wrap; justify-content: center; }
+  .logo { font-size: 1.25rem; }
+}
 
 /* Buttons */
 .btn {
@@ -155,6 +159,10 @@ nav {
 .ai-checker p { color: #A5B4FC; margin-bottom: 1.5rem; position: relative; z-index: 1; font-size: 1.05rem; }
 
 .ai-input-group { display: flex; gap: 1rem; position: relative; z-index: 1; }
+@media (max-width: 600px) {
+  .ai-input-group { flex-direction: column; }
+  .ai-input-group .btn { width: 100%; border-radius: var(--radius-sm); }
+}
 .ai-input-group input {
   flex: 1; padding: 1rem 1.5rem; border: 2px solid rgba(255,255,255,0.1); border-radius: 999px; background: rgba(255,255,255,0.05); color: white; font-size: 1rem; outline: none; transition: var(--transition); backdrop-filter: blur(10px);
 }

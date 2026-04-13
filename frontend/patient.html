@@ -238,7 +238,7 @@
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
                                 <div class="doctor-avatar">${initials}</div>
                                 <div>
-                                    <div class="card-title" style="margin-bottom: 0.15rem;">Dr. ${doc.fullName}</div>
+                                    <div class="card-title" style="margin-bottom: 0.15rem;">${doc.fullName.startsWith('Dr. ') ? doc.fullName : 'Dr. ' + doc.fullName}</div>
                                     <div style="font-size: 0.85rem; color: var(--pat-primary); font-weight: 600;">${doc.specialty}</div>
                                 </div>
                             </div>
@@ -350,7 +350,7 @@
         // ── Modal Logic ──────────────────────────────────────────────
         function openModal(doctorId, doctorName) {
             document.getElementById('modalDoctorId').value = doctorId;
-            document.getElementById('modalDoctorName').value = 'Dr. ' + doctorName;
+            document.getElementById('modalDoctorName').value = doctorName.startsWith('Dr. ') ? doctorName : 'Dr. ' + doctorName;
             document.getElementById('modalDate').value = '';
             document.getElementById('modalTime').value = '';
             document.getElementById('slotsContainer').innerHTML = '<p class="text-muted" style="font-size: 0.9rem; grid-column: 1/-1; padding: 1rem 0;">Please select a date first</p>';
