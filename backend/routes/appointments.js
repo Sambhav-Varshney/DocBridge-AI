@@ -64,6 +64,14 @@ router.get('/slots/:doctorId', authenticateToken, async (req, res) => {
 router.post('/', authenticateToken, async (req, res) => {
     const { doctor_id, date, time, reason } = req.body;
     try {
+        // Validation: Reject past dates
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selected = new Date(date);
+        if (isNaN(selected.getTime()) || selected < today) {
+            return res.status(400).json({ error: 'Appointment date cannot be in the past.' });
+        }
+
         const db = await getDB();
         
         // Validation: Verify if slot is already booked
@@ -91,7 +99,7 @@ router.get('/patient', authenticateToken, async (req, res) => {
     try {
         const db = await getDB();
         const appointments = await db.all(`
-            SELECT a.id, a.date, a.time, a.reason, a.status, u.fullName as doctorName, d.specialty
+            SELECT a.id, a.doctor_id, a.date, a.time, a.reason, a.status, u.fullName as doctorName, d.specialty
             FROM appointments a
             JOIN doctors d ON a.doctor_id = d.id
             JOIN users u ON d.user_id = u.id
@@ -114,7 +122,7 @@ router.get('/doctor', authenticateToken, async (req, res) => {
     try {
         const db = await getDB();
         const appointments = await db.all(`
-            SELECT a.id, a.date, a.time, a.reason, a.status, u.fullName as patientName, u.email as patientEmail
+            SELECT a.id, a.patient_id, a.date, a.time, a.reason, a.status, u.fullName as patientName, u.email as patientEmail
             FROM appointments a
             JOIN users u ON a.patient_id = u.id
             WHERE a.doctor_id = ?
@@ -141,6 +149,47 @@ router.put('/:id/status', authenticateToken, async (req, res) => {
             [status, req.params.id, req.user.doctorId]
         );
         res.json({ message: 'Status updated successfully' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Get visit history between a patient and doctor
+router.get('/history/:patientId/:doctorId', authenticateToken, async (req, res) => {
+    const { patientId, doctorId } = req.params;
+    try {
+        const db = await getDB();
+
+        // All appointments (excluding current PENDING ones that have never been acted on)
+        const history = await db.all(`
+            SELECT id, date, time, status, reason
+            FROM appointments
+            WHERE patient_id = ? AND doctor_id = ?
+            ORDER BY date DESC, time DESC
+        `, [patientId, doctorId]);
+
+        if (history.length === 0) {
+            return res.json({ hasHistory: false });
+        }
+
+        const totalVisits = history.length;
+        const lastVisit = history[0];
+        const approved = history.filter(h => h.status === 'APPROVED').length;
+        const rejected = history.filter(h => h.status === 'REJECTED').length;
+        const pending = history.filter(h => h.status === 'PENDING').length;
+
+        res.json({
+            hasHistory: true,
+            totalVisits,
+            lastVisitDate: lastVisit.date,
+            lastVisitTime: lastVisit.time,
+            lastVisitStatus: lastVisit.status,
+            lastVisitReason: lastVisit.reason,
+            approved,
+            rejected,
+            pending
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });

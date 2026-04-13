@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   /* Patient Blue Theme */
@@ -243,3 +243,81 @@ nav {
   .split-left { padding: 3rem 1.5rem; min-height: 40vh; }
   .split-right { padding: 3rem 1.5rem; min-height: 60vh; }
 }
+
+/* ── Visit History Card ──────────────────────────────────────── */
+.visit-history-card {
+  margin-top: 1rem;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid rgba(14, 165, 233, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 1rem 1.125rem;
+  position: relative;
+  overflow: hidden;
+}
+.doctor-theme .visit-history-card {
+  background: linear-gradient(135deg, #f0fdfa 0%, #ccfbf1 100%);
+  border-color: rgba(13, 148, 136, 0.2);
+}
+.visit-history-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+  background: linear-gradient(180deg, #0EA5E9, #6366F1);
+  border-radius: 3px 0 0 3px;
+}
+.doctor-theme .visit-history-card::before {
+  background: linear-gradient(180deg, #0D9488, #059669);
+}
+.visit-history-header {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.7px; color: #0369a1; margin-bottom: 0.75rem;
+}
+.doctor-theme .visit-history-header { color: var(--doc-primary); }
+.visit-history-header i { font-size: 1rem; }
+
+.visit-history-empty {
+  font-size: 0.875rem; color: var(--gray-500); display: flex; align-items: center; gap: 6px;
+  font-style: italic;
+}
+
+.visit-history-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;
+}
+.vh-stat {
+  background: rgba(255,255,255,0.7); border-radius: 6px;
+  padding: 0.5rem 0.625rem; text-align: center;
+  border: 1px solid rgba(14,165,233,0.12);
+}
+.doctor-theme .vh-stat { border-color: rgba(13,148,136,0.12); }
+.vh-stat-value {
+  font-size: 1.1rem; font-weight: 800; color: #0369a1; line-height: 1;
+}
+.doctor-theme .vh-stat-value { color: var(--doc-primary); }
+.vh-stat-label {
+  font-size: 0.7rem; color: var(--gray-500); margin-top: 0.2rem;
+  font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+}
+
+.visit-last-info {
+  margin-top: 0.65rem; padding-top: 0.65rem;
+  border-top: 1px dashed rgba(14,165,233,0.2);
+  display: flex; gap: 0.5rem; flex-wrap: wrap;
+}
+.doctor-theme .visit-last-info { border-top-color: rgba(13,148,136,0.2); }
+.vh-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.8); border-radius: 999px;
+  padding: 0.25rem 0.625rem; font-size: 0.78rem; color: var(--gray-800);
+  border: 1px solid rgba(14,165,233,0.15); font-weight: 500;
+}
+.doctor-theme .vh-chip { border-color: rgba(13,148,136,0.15); }
+.vh-chip i { font-size: 0.85rem; color: #0EA5E9; }
+.doctor-theme .vh-chip i { color: var(--doc-accent); }
+.vh-status-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  border-radius: 999px; padding: 0.25rem 0.625rem;
+  font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+}
+.vh-status-approved { background: #ECFDF5; color: #059669; border: 1px solid #A7F3D0; }
+.vh-status-pending  { background: #FFFBEB; color: #D97706; border: 1px solid #FDE68A; }
+.vh-status-rejected { background: #FEF2F2; color: #DC2626; border: 1px solid #FECACA; }

@@ -7,6 +7,7 @@
     <meta name="description" content="Manage patient appointment requests with DocBridge.">
     <link rel="stylesheet" href="style.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230F766E'/><path d='M16 7v18M7 16h18' stroke='white' stroke-width='4' stroke-linecap='round'/></svg>">
     <style>
         .req-card {
             position: relative; overflow: hidden;
@@ -15,7 +16,7 @@
         }
         .req-card.approved { border-left-color: #10B981; }
         .req-card.rejected { border-left-color: #EF4444; }
-        .req-card.pending { border-left-color: #F59E0B; }
+        .req-card.pending  { border-left-color: #F59E0B; }
 
         .patient-avatar {
             width: 52px; height: 52px; border-radius: 50%;
@@ -40,8 +41,16 @@
         }
         .stat-item { text-align: center; flex: 1; }
         .stat-item h3 { font-size: 2rem; font-weight: 800; color: var(--doc-primary); }
-        .stat-item p { font-size: 0.85rem; color: var(--gray-500); margin-top: 0.25rem; }
+        .stat-item p  { font-size: 0.85rem; color: var(--gray-500); margin-top: 0.25rem; }
+
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .vh-shimmer {
+            height: 48px; border-radius: var(--radius-sm);
+            background: linear-gradient(90deg, #ccfbf1 25%, #99f6e4 50%, #ccfbf1 75%);
+            background-size: 200% 100%; animation: shimmer 1.4s infinite;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
 <body class="doctor-theme" style="min-height: 100vh;">
@@ -109,7 +118,7 @@
 
     <script>
         const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user'));
+        const user  = JSON.parse(localStorage.getItem('user'));
         if (!token || user.role !== 'doctor') {
             window.location.href = 'login.html';
         }
@@ -121,6 +130,53 @@
             window.location.href = 'login.html';
         }
 
+        // ── Visit History Helpers ────────────────────────────────────
+        async function fetchVisitHistory(patientId, doctorId) {
+            try {
+                const res = await fetch(`/api/appointments/history/${patientId}/${doctorId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                return await res.json();
+            } catch {
+                return null;
+            }
+        }
+
+        function buildVisitHistoryHTML(h) {
+            const header = `<div class="visit-history-header"><i class='bx bx-history'></i> Patient's Visit History</div>`;
+            if (!h || !h.hasHistory) {
+                return `<div class="visit-history-card">${header}
+                    <div class="visit-history-empty"><i class='bx bx-info-circle'></i> No previous visit history found.</div>
+                </div>`;
+            }
+            const statusClass = h.lastVisitStatus === 'APPROVED' ? 'vh-status-approved'
+                              : h.lastVisitStatus === 'REJECTED' ? 'vh-status-rejected'
+                              : 'vh-status-pending';
+            return `<div class="visit-history-card">
+                ${header}
+                <div class="visit-history-grid">
+                    <div class="vh-stat">
+                        <div class="vh-stat-value">${h.totalVisits}</div>
+                        <div class="vh-stat-label">Total Visits</div>
+                    </div>
+                    <div class="vh-stat">
+                        <div class="vh-stat-value" style="color:#059669">${h.approved}</div>
+                        <div class="vh-stat-label">Approved</div>
+                    </div>
+                    <div class="vh-stat">
+                        <div class="vh-stat-value" style="color:#DC2626">${h.rejected}</div>
+                        <div class="vh-stat-label">Rejected</div>
+                    </div>
+                </div>
+                <div class="visit-last-info">
+                    <span class="vh-chip"><i class='bx bx-calendar'></i> Last: ${h.lastVisitDate}</span>
+                    <span class="vh-chip"><i class='bx bx-time-five'></i> ${h.lastVisitTime}</span>
+                    <span class="vh-status-badge ${statusClass}">${h.lastVisitStatus}</span>
+                </div>
+            </div>`;
+        }
+
+        // ── Fetch Appointment Requests ───────────────────────────────
         async function fetchRequests() {
             try {
                 const response = await fetch('/api/appointments/doctor', {
@@ -141,16 +197,18 @@
                 }
 
                 // Update stats
-                const total = appointments.length;
-                const pending = appointments.filter(a => a.status === 'PENDING').length;
+                const total    = appointments.length;
+                const pending  = appointments.filter(a => a.status === 'PENDING').length;
                 const approved = appointments.filter(a => a.status === 'APPROVED').length;
                 const rejected = appointments.filter(a => a.status === 'REJECTED').length;
-                document.getElementById('totalCount').innerText = total;
-                document.getElementById('pendingCount').innerText = pending;
+                document.getElementById('totalCount').innerText    = total;
+                document.getElementById('pendingCount').innerText  = pending;
                 document.getElementById('approvedCount').innerText = approved;
                 document.getElementById('rejectedCount').innerText = rejected;
                 document.getElementById('statStrip').style.display = 'flex';
 
+                // Build all cards with shimmer history placeholders
+                let html = '';
                 appointments.forEach(app => {
                     let badgeClass = 'badge-pending', statusClass = 'pending';
                     if (app.status === 'APPROVED') { badgeClass = 'badge-approved'; statusClass = 'approved'; }
@@ -171,7 +229,7 @@
                             </div>`;
                     }
 
-                    grid.innerHTML += `
+                    html += `
                         <div class="card req-card ${statusClass}">
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem;">
                                 <div style="display: flex; align-items: center; gap: 0.875rem;">
@@ -194,9 +252,22 @@
                                 <i class='bx bx-message-square-detail'></i> ${app.reason}
                             </div>
 
+                            <div id="vh-doctor-${app.id}"><div class="vh-shimmer" style="margin-top: 1rem;"></div></div>
+
                             ${actionsHtml}
                         </div>`;
                 });
+                grid.innerHTML = html;
+
+                // Fetch + inject visit history for each card
+                const myDoctorId = user.doctorId;
+                appointments.forEach(async app => {
+                    if (!app.patient_id || !myDoctorId) return;
+                    const h  = await fetchVisitHistory(app.patient_id, myDoctorId);
+                    const el = document.getElementById(`vh-doctor-${app.id}`);
+                    if (el) el.innerHTML = buildVisitHistoryHTML(h);
+                });
+
             } catch (err) {
                 console.error('Error fetching requests:', err);
                 document.getElementById('requestsGrid').innerHTML = '<p class="text-muted">Failed to load requests.</p>';

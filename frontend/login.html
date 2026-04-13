@@ -6,6 +6,7 @@
     <title>Login - DocBridge</title>
     <link rel="stylesheet" href="style.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%232563EB'/><path d='M16 7v18M7 16h18' stroke='white' stroke-width='4' stroke-linecap='round'/></svg>">
 </head>
 <body>
     <div class="split-layout">
@@ -67,11 +68,11 @@
                 if (response.ok) {
                     errorDiv.style.display = 'none';
                     localStorage.setItem('token', result.token);
-                    localStorage.setItem('user', JSON.stringify({ id: result.id, fullName: result.fullName, role: result.role }));
+                    localStorage.setItem('user', JSON.stringify({ id: result.user.id, fullName: result.user.fullName, role: result.user.role, doctorId: result.user.doctorId || null }));
                     
-                    if (result.role === 'patient') {
+                    if (result.user.role === 'patient') {
                         window.location.href = 'patient.html';
-                    } else if (result.role === 'doctor') {
+                    } else if (result.user.role === 'doctor') {
                         window.location.href = 'doctor.html';
                     }
                 } else {
