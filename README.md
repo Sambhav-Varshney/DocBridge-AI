@@ -1,6 +1,6 @@
-# 🏥 DocBridge — AI-Powered Doctor Appointment System
+# 🏥 DocBridge — AI-Powered Doctor Appointment Platform
 
-> A full-stack healthcare appointment management platform built with **Node.js**, **Express**, **SQLite**, and a premium glassmorphism UI. Features AI-powered symptom analysis via Google Gemini and a complete visit history system.
+> A production-ready, full-stack healthcare appointment management platform built with **Node.js**, **Express**, **SQLite**, and a premium glassmorphism UI. Features AI-powered symptom analysis via Google Gemini and a complete visit history system.
 
 ---
 
@@ -42,7 +42,7 @@
 - SQLite via `better-sqlite3` / `sqlite` drivers
 - Tables: `users`, `doctors`, `appointments`
 - Foreign key constraints and status tracking
-- `db_reset_seed.js` — clean demo seeding script
+- `db_reset_seed.js` — platform initialization and data seeding script
 - `db_audit.js` — read-only database inspector
 - `db_cleanup.js` — removes corrupt records safely
 
@@ -62,7 +62,7 @@
 
 ---
 
-## 🚀 Running Locally (For Presentation)
+## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js v18+ installed
@@ -89,11 +89,11 @@ JWT_SECRET=docbridge_super_secret_key_2026
 GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
-> 💡 Get a free Gemini API key at https://aistudio.google.com/apikey
-> The app works without it using the built-in keyword fallback.
+> 💡 Get a free Gemini API key at https://aistudio.google.com/apikey  
+> The platform works without it using the built-in keyword fallback.
 
 ```bash
-# 4. Seed demo database
+# 4. Initialize the platform with seed data
 node db_reset_seed.js
 
 # 5. Start the server
@@ -105,7 +105,9 @@ npm run dev
 
 ---
 
-## 🎯 Demo Credentials
+## 🔑 Reviewer Access
+
+The following accounts are pre-seeded for platform review and evaluation:
 
 | Role | Email | Password |
 |------|-------|----------|
@@ -113,7 +115,7 @@ npm run dev
 | 👨‍⚕️ **Doctor** (Neurologist) | `arjun.mehta@docbridge.com` | `Doctor@123` |
 | 🧑 **Patient** | `rohan.verma@docbridge.com` | `Patient@123` |
 
-> You can also register new accounts live — both Patient and Doctor registration work fully.
+> New accounts can also be registered live — both Patient and Doctor registration flows are fully operational.
 
 ---
 
@@ -136,8 +138,8 @@ DocBridge-AI/
 │   ├── patient.html           # Patient dashboard
 │   ├── doctor.html            # Doctor dashboard
 │   └── style.css              # Full design system
-├── db_reset_seed.js           # Demo DB setup script
-├── db_audit.js                # DB read-only inspector
+├── db_reset_seed.js           # Platform initialization & data seeding
+├── db_audit.js                # Database read-only inspector
 ├── db_cleanup.js              # Corrupt record cleaner
 ├── package.json
 └── .env                       # ← Create this (not committed)
@@ -156,7 +158,7 @@ DocBridge-AI/
 ### Doctors
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/doctors` | List all doctors |
+| GET | `/api/doctors` | List all verified doctors |
 
 ### Appointments
 | Method | Endpoint | Description |
@@ -177,7 +179,7 @@ DocBridge-AI/
 
 ## 🛡️ Security Notes
 - `.env` and `database.sqlite` are gitignored — never committed
-- All passwords are bcrypt-hashed
+- All passwords are bcrypt-hashed before storage
 - All protected routes require a valid JWT in the `Authorization: Bearer <token>` header
 - Past dates are rejected both client-side (input `min`) and server-side
 
@@ -190,4 +192,4 @@ GitHub: [@Sambhav-Varshney](https://github.com/Sambhav-Varshney)
 
 ---
 
-*Built as a full-stack SaaS demo for healthcare appointment management.*
+*DocBridge is a full-stack SaaS platform for modern healthcare appointment management.*

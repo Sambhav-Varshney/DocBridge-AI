@@ -1,9 +1,9 @@
 /**
  * db_reset_seed.js
- * Wipes ALL existing data and seeds a clean demo database with:
+ * Wipes ALL existing data and initializes the platform database with:
  *   - 2 professional doctors
- *   - 1 demo patient
- * Run ONCE before demo.
+ *   - 1 evaluation patient
+ * Run ONCE to initialize the platform with pre-seeded data.
  */
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt  = require('bcrypt');
@@ -55,13 +55,13 @@ async function run() {
         }}
     ));
 
-    // ── Demo Patient ────────────────────────────────────────────────
+    // ── Evaluation Patient ──────────────────────────────────────────
     const pw3 = await hashPassword('Patient@123');
     await new Promise((res, rej) => db.run(
         `INSERT INTO users (fullName, email, password, role, phone, gender, dob)
          VALUES (?, ?, ?, 'patient', ?, 'male', '2000-06-15')`,
         ['Rohan Verma', 'rohan.verma@docbridge.com', pw3, '+91 99300 55667'],
-        function(err) { if (err) rej(err); else { console.log(`✓  Demo Patient — Rohan Verma (user_id=${this.lastID})`); res(); } }
+        function(err) { if (err) rej(err); else { console.log(`✓  Evaluation Patient — Rohan Verma (user_id=${this.lastID})`); res(); } }
     ));
 
     // ── Verify ──────────────────────────────────────────────────────
@@ -71,7 +71,7 @@ async function run() {
             if (r.role === 'doctor') console.log(`   DOCTOR  [${r.id}] ${r.fullName} | ${r.email} | ${r.specialty} | ${r.experience}`);
             else                     console.log(`   PATIENT [${r.id}] ${r.fullName} | ${r.email}`);
         });
-        console.log('\n🎯 Demo Credentials:');
+        console.log('\n🔑 Evaluation Access:');
         console.log('   DOCTOR 1 : priya.sharma@docbridge.com  / Doctor@123');
         console.log('   DOCTOR 2 : arjun.mehta@docbridge.com   / Doctor@123');
         console.log('   PATIENT  : rohan.verma@docbridge.com   / Patient@123');

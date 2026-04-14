@@ -11,7 +11,7 @@ async function seed() {
         return;
     }
 
-    const dummyDoctors = [
+    const initialDoctors = [
         { fullName: "Alice Smith", email: "alice@hospital.com", role: "doctor", specialty: "Cardiologist", experience: "10 years" },
         { fullName: "Bob Jones", email: "bob@hospital.com", role: "doctor", specialty: "Dermatologist", experience: "5 years" },
         { fullName: "Charlie Brown", email: "charlie@hospital.com", role: "doctor", specialty: "Neurologist", experience: "8 years" },
@@ -20,7 +20,7 @@ async function seed() {
 
     const password = await bcrypt.hash("password123", 10);
 
-    for (const doc of dummyDoctors) {
+    for (const doc of initialDoctors) {
         try {
             const result = await db.run(
                 `INSERT INTO users (fullName, email, password, role, phone, gender) VALUES (?, ?, ?, ?, ?, ?)`,
