@@ -5,10 +5,11 @@ let pool;
 function getPool() {
     if (!pool) {
         pool = mysql.createPool({
-            host: '127.0.0.1',
-            user: 'root',
-            password: 'Code@cs123',
-            database: 'docbridge',
+            host: process.env.DB_HOST || '127.0.0.1',
+            user: process.env.DB_USER || 'root',
+            password: process.env.DB_PASSWORD || 'Code@cs123',
+            database: process.env.DB_NAME || 'docbridge',
+            port: process.env.DB_PORT || 3306,
             waitForConnections: true,
             connectionLimit: 10
         });
@@ -19,10 +20,11 @@ function getPool() {
 async function getDB() {
     if (!pool) {
         pool = mysql.createPool({
-            host: '127.0.0.1',
-            user: 'root',
-            password: 'Code@cs123',
-            database: 'docbridge',
+            host: process.env.DB_HOST || '127.0.0.1',
+            user: process.env.DB_USER || 'root',
+            password: process.env.DB_PASSWORD || 'Code@cs123',
+            database: process.env.DB_NAME || 'docbridge',
+            port: process.env.DB_PORT || 3306,
             waitForConnections: true,
             connectionLimit: 10
         });
@@ -58,10 +60,11 @@ async function getDB() {
 
 async function initDB() {
     const connection = await mysql.createConnection({
-        host: '127.0.0.1',
-        user: 'root',
-        password: 'Code@cs123',
-        database: 'docbridge',
+        host: process.env.DB_HOST || '127.0.0.1',
+        user: process.env.DB_USER || 'root',
+        password: process.env.DB_PASSWORD || 'Code@cs123',
+        database: process.env.DB_NAME || 'docbridge',
+        port: process.env.DB_PORT || 3306
     });
 
     await connection.query(`CREATE DATABASE IF NOT EXISTS docbridge`);
