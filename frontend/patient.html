@@ -80,14 +80,25 @@
             <h2><i class='bx bx-brain'></i> AI Symptom Checker</h2>
             <p>Not sure which specialist to choose? Describe your symptoms below and let our AI guide you.</p>
             <div class="ai-input-group">
-                <input type="text" id="symptomsInput" placeholder="E.g., I have a severe headache and blurred vision...">
+                <input type="text" id="symptomsInput" placeholder="E.g., I have a severe headache and blurred vision..." onkeydown="if(event.key==='Enter') checkSymptoms()">
                 <button class="btn" onclick="checkSymptoms()"><i class='bx bx-search-alt-2'></i> Analyze</button>
             </div>
             <div id="aiResult"></div>
         </div>
 
+        <!-- AI Check History -->
+        <div style="margin-top: 2.5rem;">
+            <div class="section-label"><i class='bx bx-history'></i> &nbsp;My AI Check History</div>
+            <div id="aiHistoryList">
+                <div class="card" style="text-align:center; padding: 2rem;">
+                    <i class='bx bx-loader-alt' style="font-size: 2rem; color: var(--pat-primary); animation: spin 1s linear infinite;"></i>
+                    <p class="text-muted" style="margin-top: 0.5rem;">Loading history...</p>
+                </div>
+            </div>
+        </div>
+
         <!-- Available Doctors -->
-        <div class="section-label"><i class='bx bx-user-md'></i> &nbsp;Available Doctors</div>
+        <div class="section-label" style="margin-top: 3rem;"><i class='bx bx-user-md'></i> &nbsp;Available Doctors</div>
         <div class="grid" id="doctorsGrid">
             <div class="card" style="text-align: center; padding: 3rem;">
                 <i class='bx bx-loader-alt' style="font-size: 2rem; color: var(--pat-primary); animation: spin 1s linear infinite;"></i>
@@ -156,12 +167,22 @@
 
     <script>
         const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (!token || user.role !== 'patient') {
+        let user;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch(e) { user = null; }
+        if (!token || !user || user.role !== 'patient') {
             window.location.href = 'login.html';
         }
 
         document.getElementById('userNameDisplay').innerText = user.fullName;
+
+        function handleAuthError(status) {
+            if (status === 401 || status === 403) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+                return true;
+            }
+            return false;
+        }
 
         // Fix B1/B4: Set min date on the booking modal to today
         const todayStr = new Date().toISOString().split('T')[0];
@@ -226,19 +247,20 @@
                 const grid = document.getElementById('doctorsGrid');
                 grid.innerHTML = '';
 
-                if (doctors.length === 0) {
-                    grid.innerHTML = '<p class="text-muted">No doctors available.</p>';
+                if (!Array.isArray(doctors) || doctors.length === 0) {
+                    grid.innerHTML = '<p class="text-muted" style="padding:2rem;">No doctors available.</p>';
                     return;
                 }
 
                 doctors.forEach(doc => {
-                    const initials = doc.fullName.split(' ').map(n => n[0]).join('').toUpperCase();
+                    const nameStr = doc.fullName || 'Doctor';
+                    const initials = nameStr.split(' ').map(n => n[0]).filter(Boolean).join('').toUpperCase().substring(0, 2);
                     grid.innerHTML += `
                         <div class="card doctor-card">
                             <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
                                 <div class="doctor-avatar">${initials}</div>
                                 <div>
-                                    <div class="card-title" style="margin-bottom: 0.15rem;">${doc.fullName.startsWith('Dr. ') ? doc.fullName : 'Dr. ' + doc.fullName}</div>
+                                    <div class="card-title" style="margin-bottom: 0.15rem;">${nameStr.startsWith('Dr. ') ? nameStr : 'Dr. ' + nameStr}</div>
                                     <div style="font-size: 0.85rem; color: var(--pat-primary); font-weight: 600;">${doc.specialty}</div>
                                 </div>
                             </div>
@@ -267,11 +289,12 @@
                 const response = await fetch('/api/appointments/patient', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                if (handleAuthError(response.status)) return;
                 const appointments = await response.json();
                 const grid = document.getElementById('appointmentsGrid');
                 grid.innerHTML = '';
 
-                if (appointments.length === 0) {
+                if (!Array.isArray(appointments) || appointments.length === 0) {
                     grid.innerHTML = `<div class="card" style="text-align: center; padding: 3rem; grid-column: 1/-1;">
                         <i class='bx bx-calendar-x' style="font-size: 3rem; color: var(--gray-200);"></i>
                         <p class="text-muted" style="margin-top: 1rem;">You have no appointments yet. Book one above!</p>
@@ -328,8 +351,8 @@
 
         // ── AI Checker ───────────────────────────────────────────────
         async function checkSymptoms() {
-            const symptoms = document.getElementById('symptomsInput').value;
-            if (!symptoms) return alert("Please enter your symptoms.");
+            const symptoms = document.getElementById('symptomsInput').value.trim();
+            if (!symptoms) return alert('Please enter your symptoms.');
             const resDiv = document.getElementById('aiResult');
             resDiv.style.display = 'block';
             resDiv.innerHTML = '<i class="bx bx-loader-alt" style="animation: spin 1s linear infinite; margin-right: 8px;"></i> Analyzing your symptoms...';
@@ -337,13 +360,85 @@
             try {
                 const response = await fetch('/api/ai/recommend', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: JSON.stringify({ symptoms })
                 });
                 const data = await response.json();
-                resDiv.innerHTML = `<span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #818CF8;">AI Recommendation</span><br><strong>${data.message}</strong><br><small style="color: rgba(255,255,255,0.7); margin-top: 0.5rem; display: block;">Look for a ${data.recommendation} in the doctors list below ↓</small>`;
+                resDiv.innerHTML = `
+                    <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #818CF8;">AI Recommendation</span><br>
+                    <strong>${data.message}</strong><br>
+                    <small style="color: rgba(255,255,255,0.7); margin-top: 0.5rem; display: block;">
+                        <i class='bx bx-check-circle'></i> Saved to your history &nbsp;·&nbsp; Look for a ${data.recommendation} in the doctors list below ↓
+                    </small>`;
+                document.getElementById('symptomsInput').value = '';
+                fetchAIHistory(); // refresh history panel
             } catch (err) {
                 resDiv.innerHTML = '<i class="bx bx-error-circle"></i> Error analyzing symptoms.';
+            }
+        }
+
+        // ── AI Check History ─────────────────────────────────────────
+        async function fetchAIHistory() {
+            const container = document.getElementById('aiHistoryList');
+            try {
+                const res = await fetch('/api/ai/history', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const checks = await res.json();
+
+                if (!Array.isArray(checks) || checks.length === 0) {
+                    container.innerHTML = `<div class="card" style="text-align:center; padding: 2rem; grid-column:1/-1;">
+                        <i class='bx bx-brain' style="font-size: 2.5rem; color: var(--gray-200);"></i>
+                        <p class="text-muted" style="margin-top: 0.75rem;">No AI checks yet. Try the symptom checker above!</p>
+                    </div>`;
+                    return;
+                }
+
+                const specColors = {
+                    'Cardiologist': '#EF4444',
+                    'Dermatologist': '#F59E0B',
+                    'Neurologist': '#8B5CF6',
+                    'Gastroenterologist': '#10B981',
+                    'Orthopedic Surgeon': '#3B82F6',
+                    'Dentist': '#06B6D4',
+                    'Ophthalmologist': '#6366F1',
+                    'ENT Specialist': '#EC4899',
+                    'Pediatrician': '#84CC16',
+                    'Psychiatrist': '#A78BFA',
+                    'General Physician': '#64748B'
+                };
+
+                container.innerHTML = checks.map(c => {
+                    const color = specColors[c.result] || 'var(--pat-primary)';
+                    const date = new Date(c.checked_at).toLocaleString('en-IN', {
+                        day: '2-digit', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                    return `
+                    <div class="card" style="display:flex; align-items:flex-start; gap:1rem; padding:1.25rem; margin-bottom:0.75rem; border-left: 4px solid ${color};">
+                        <div style="flex-shrink:0; width:44px; height:44px; border-radius:50%; background:${color}18; display:flex; align-items:center; justify-content:center; color:${color}; font-size:1.3rem;">
+                            <i class='bx bx-brain'></i>
+                        </div>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-size:0.82rem; color:var(--gray-500); margin-bottom:0.3rem;">
+                                <i class='bx bx-time-five'></i> ${date}
+                            </div>
+                            <div style="font-size:0.95rem; color:var(--gray-700); margin-bottom:0.5rem; word-break:break-word;">
+                                <i class='bx bx-comment-detail' style='color:var(--gray-400)'></i>
+                                &nbsp;${c.symptoms}
+                            </div>
+                            <span style="display:inline-block; background:${color}18; color:${color}; border:1px solid ${color}40; border-radius:999px; padding:0.25rem 0.85rem; font-size:0.8rem; font-weight:700;">
+                                <i class='bx bx-user-md'></i> ${c.result}
+                            </span>
+                        </div>
+                    </div>`;
+                }).join('');
+
+            } catch (err) {
+                container.innerHTML = '<p class="text-muted" style="padding:1rem;"><i class="bx bx-error-circle"></i> Failed to load history.</p>';
             }
         }
 
@@ -450,6 +545,7 @@
 
         fetchDoctors();
         fetchAppointments();
+        fetchAIHistory();
     </script>
 </body>
 </html>

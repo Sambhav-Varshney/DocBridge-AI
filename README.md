@@ -1,84 +1,56 @@
-# 🏥 DocBridge — AI-Powered Doctor Appointment Platform
+# DocBridge Platform
 
-> A full-stack healthcare appointment management platform featuring AI-powered symptom analysis, smart scheduling, and a premium glassmorphic interface.
+A medical appointment and diagnostics platform that connects patients with healthcare professionals. The system includes role-based access, scheduling logic, and an integrated AI Symptom Checker.
 
-[Live Demo Placeholder](https://your-demo-link.com)
+## Key Features
 
----
+* **Role-Based Access Control:** Separate dashboard flows for Patients and Doctors.
+* **AI Symptom Analysis:** Integrated with Google Gemini API to analyze patient symptoms and recommend appropriate medical specialties.
+* **Smart Scheduling:** Real-time appointment booking with protections against calendar conflicts and duplicate reservations.
+* **Doctor Review Flow:** A dedicated interface for doctors to manage, approve, or reject patient visit requests.
+* **Modern UI:** Responsive frontend built with custom CSS, focusing on clean layouts and usability.
 
-## 🚀 Overview
+## Technology Stack
 
-DocBridge is a comprehensive healthcare solution designed to bridge the gap between patients and medical professionals. The platform streamlines the appointment booking process using an intelligent slot-allocation system and leverages Google Gemini AI to provide initial symptom-based specialist recommendations.
+* **Frontend:** HTML5, CSS3, Vanilla JavaScript
+* **Backend:** Node.js, Express.js
+* **Database:** MySQL (using `mysql2` driver)
+* **Authentication:** JWT (JSON Web Tokens), bcrypt
+* **AI Integration:** Google Generative AI (`@google/generative-ai`)
 
-## ✨ Key Features
+## Local Setup
 
-- **🤖 AI-Driven Triage**: Integration with Google Gemini 1.5 Flash to analyze symptoms and recommend appropriate specialists.
-- **📅 Smart Scheduling**: Real-time appointment slot management with automated availability checks and conflict prevention.
-- **🔐 Secure Authentication**: Robust security using JWT-based authentication and role-based access control (RBAC) for Patients and Doctors.
-- **📊 Interactive Dashboards**: Dedicated data-driven interfaces for both roles to manage history, status, and schedules.
-- **💎 Premium UI/UX**: Modern, responsive design built with a glassmorphism aesthetic for an enhanced user experience.
+### 1. Prerequisites
+Ensure you have Node.js (v18+) installed and a local MySQL server running.
 
-## 🛠️ Tech Stack
+### 2. Configure Environment
+Create a `.env` file in the project's root directory:
+```env
+PORT=3000
+JWT_SECRET=your_secret_jwt_key
+GEMINI_API_KEY=your_gemini_api_key
+```
 
-- **Backend**: Node.js, Express.js
-- **Database**: SQLite (better-sqlite3)
-- **AI**: Google Generative AI (Gemini SDK)
-- **Security**: JWT, bcrypt
-- **Frontend**: Vanilla JavaScript, CSS3 (Custom Properties), HTML5
-- **Icons**: Boxicons
+### 3. Database Initialization
+Configure your database credentials inside `backend/db.js`. The tables (`users`, `doctors`, `appointments`, and `symptom_checks`) are automatically created by the `initDB()` process on the first application startup. You can find useful database setup and seed scripts in the `scripts/` directory.
 
-## 📸 Screenshots
+### 4. Install & Run
+```bash
+npm install
+npm run dev
+```
+Navigate to `http://localhost:3000` to view the application.
 
-*(Add your screenshots here)*
+## Deployment
 
-| Landing Page | Patient Dashboard | AI Symptom Checker |
-| :---: | :---: | :---: |
-| ![Landing Placeholder](https://via.placeholder.com/800x450?text=Landing+Page) | ![Dashboard Placeholder](https://via.placeholder.com/800x450?text=Patient+Dashboard) | ![AI Placeholder](https://via.placeholder.com/800x450?text=AI+Symptom+Checker) |
+The application is configured for standard Node.js hosting environments.
+* **Render:** Deploy as a web service using the standard `npm start` command.
+* **Vercel:** Compatible by using a `vercel.json` file with rewrite routing rules.
 
----
+## Screenshots
 
-## ⚙️ Installation & Setup
-
-### Prerequisites
-- Node.js (v18 or higher)
-- Google Gemini API Key (Optional: System includes a keyword-based fallback)
-
-### Local Development
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Sambhav-Varshney/DocBridge-AI.git
-   cd DocBridge-AI
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment**
-   Create a `.env` file in the root directory:
-   ```env
-   PORT=3000
-   JWT_SECRET=your_secure_secret_key
-   GEMINI_API_KEY=your_gemini_api_key
-   ```
-
-4. **Initialize & Run**
-   ```bash
-   node db_reset_seed.js  # Seeds initial platform data
-   npm run dev            # Starts development server
-   ```
-
-Access the platform at `http://localhost:3000`.
+*(Placeholder for application screenshots)*
 
 ---
 
-## 👨‍💻 Author
-
-**Sambhav Varshney**  
-- GitHub: [@Sambhav-Varshney](https://github.com/Sambhav-Varshney)
-
----
-
-*Built as a production-representative healthcare management platform.*
+*Repository maintained for technical demonstration.*

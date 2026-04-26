@@ -1,20 +1,21 @@
 const express = require('express');
-const { getDB } = require('../db');
+const { getPool } = require('../db');
 
 const router = express.Router();
 
 // Get all doctors
 router.get('/', async (req, res) => {
     try {
-        const db = await getDB();
-        const doctors = await db.all(`
-            SELECT d.id as doctorId, u.fullName, u.email, d.specialty, d.experience, u.gender, u.phone 
-            FROM doctors d 
+        const pool = getPool();
+    // JOIN users so name/email comes from the real user account
+        const [rows] = await pool.execute(`
+            SELECT d.id as doctorId, u.fullName, u.email, d.specialization as specialty, d.experience, d.fees, u.gender, u.phone
+            FROM doctors d
             JOIN users u ON d.user_id = u.id
         `);
-        res.json(doctors);
+        res.json(rows);
     } catch (error) {
-        console.error(error);
+        console.error('GET /api/doctors error:', error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });

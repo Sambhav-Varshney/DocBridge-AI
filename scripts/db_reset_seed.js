@@ -7,8 +7,9 @@
  */
 const sqlite3 = require('sqlite3').verbose();
 const bcrypt  = require('bcrypt');
+const path    = require('path');
 
-const db = new sqlite3.Database('./database.sqlite');
+const db = new sqlite3.Database(path.join(__dirname, '../database.sqlite'));
 const SALT_ROUNDS = 10;
 
 async function hashPassword(pw) {

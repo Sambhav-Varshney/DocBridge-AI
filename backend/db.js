@@ -1,58 +1,125 @@
-const sqlite3 = require('sqlite3').verbose();
-const { open } = require('sqlite');
-const fs = require('fs');
+const mysql = require('mysql2/promise');
+
+let pool;
+
+function getPool() {
+    if (!pool) {
+        pool = mysql.createPool({
+            host: '127.0.0.1',
+            user: 'root',
+            password: 'Code@cs123',
+            database: 'docbridge',
+            waitForConnections: true,
+            connectionLimit: 10
+        });
+    }
+    return pool;
+}
 
 async function getDB() {
-    return open({
-        filename: './database.sqlite',
-        driver: sqlite3.Database
-    });
+    if (!pool) {
+        pool = mysql.createPool({
+            host: '127.0.0.1',
+            user: 'root',
+            password: 'Code@cs123',
+            database: 'docbridge',
+            waitForConnections: true,
+            connectionLimit: 10
+        });
+    }
+
+    return {
+        // one row
+        async get(sql, params = []) {
+            const [rows] = await pool.execute(sql, params);
+            return rows[0] || null;
+        },
+
+        // all rows
+        async all(sql, params = []) {
+            const [rows] = await pool.execute(sql, params);
+            return rows;
+        },
+
+        // insert / update / delete
+        async run(sql, params = []) {
+            const [result] = await pool.execute(sql, params);
+            result.lastID = result.insertId;
+            result.changes = result.affectedRows;
+            return result;
+        },
+
+        async exec(sql) {
+            const [result] = await pool.query(sql);
+            return result;
+        }
+    };
 }
 
 async function initDB() {
+    const connection = await mysql.createConnection({
+        host: '127.0.0.1',
+        user: 'root',
+        password: 'Code@cs123',
+        database: 'docbridge',
+    });
+
+    await connection.query(`CREATE DATABASE IF NOT EXISTS docbridge`);
+    await connection.end();
+
     const db = await getDB();
-    
-    // Create Users Table
+
     await db.exec(`
         CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fullName TEXT NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL, 
-            phone TEXT,
-            gender TEXT,
-            dob TEXT
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            fullName VARCHAR(255),
+            email VARCHAR(255) UNIQUE,
+            password VARCHAR(255),
+            role VARCHAR(50),
+            phone VARCHAR(30),
+            gender VARCHAR(20),
+            dob VARCHAR(30)
         )
     `);
 
-    // Create Doctors Table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS doctors (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER UNIQUE NOT NULL,
-            specialty TEXT,
-            experience TEXT,
-            FOREIGN KEY(user_id) REFERENCES users(id)
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT UNIQUE,
+            name VARCHAR(100),
+            specialization VARCHAR(100),
+            experience INT,
+            fees DECIMAL(10,2) DEFAULT 300.00,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         )
     `);
 
-    // Create Appointments Table
     await db.exec(`
         CREATE TABLE IF NOT EXISTS appointments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            patient_id INTEGER NOT NULL,
-            doctor_id INTEGER NOT NULL,
-            date TEXT NOT NULL,
-            time TEXT NOT NULL,
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            patient_id INT,
+            doctor_id INT,
+            date VARCHAR(30),
+            time VARCHAR(20),
             reason TEXT,
-            status TEXT DEFAULT 'PENDING',
-            FOREIGN KEY(patient_id) REFERENCES users(id),
-            FOREIGN KEY(doctor_id) REFERENCES doctors(id)
+            status VARCHAR(30) DEFAULT 'PENDING',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE
         )
     `);
 
-    return db;
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS symptom_checks (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            symptoms TEXT NOT NULL,
+            result VARCHAR(255) NOT NULL,
+            checked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+    `);
 }
 
-module.exports = { getDB, initDB };
+module.exports = { getDB, getPool, initDB };

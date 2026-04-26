@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const { initDB } = require('./backend/db');
+const { initDB } = require('../backend/db');
 
 async function seed() {
     const db = await initDB();

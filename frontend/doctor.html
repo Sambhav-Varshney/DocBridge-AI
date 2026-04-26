@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Dashboard - DocBridge</title>
-    <meta name="description" content="Manage patient appointment requests with DocBridge.">
+    <meta name="description" content="DocBridge Doctor Dashboard — Review, approve or reject patient appointment requests in real time.">
     <link rel="stylesheet" href="style.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%230F766E'/><path d='M16 7v18M7 16h18' stroke='white' stroke-width='4' stroke-linecap='round'/></svg>">
@@ -118,12 +118,22 @@
 
     <script>
         const token = localStorage.getItem('token');
-        const user  = JSON.parse(localStorage.getItem('user'));
-        if (!token || user.role !== 'doctor') {
+        let user;
+        try { user = JSON.parse(localStorage.getItem('user')); } catch(e) { user = null; }
+        if (!token || !user || user.role !== 'doctor') {
             window.location.href = 'login.html';
         }
 
         document.getElementById('userNameDisplay').innerText = user.fullName.startsWith('Dr. ') ? user.fullName : `Dr. ${user.fullName}`;
+
+        function handleAuthError(status) {
+            if (status === 401 || status === 403) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+                return true;
+            }
+            return false;
+        }
 
         function logout() {
             localStorage.clear();
@@ -182,11 +192,12 @@
                 const response = await fetch('/api/appointments/doctor', {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+                if (handleAuthError(response.status)) return;
                 const appointments = await response.json();
                 const grid = document.getElementById('requestsGrid');
                 grid.innerHTML = '';
 
-                if (appointments.length === 0) {
+                if (!Array.isArray(appointments) || appointments.length === 0) {
                     grid.innerHTML = `
                         <div class="card" style="text-align: center; padding: 4rem; border: 2px dashed var(--gray-200); grid-column: 1/-1; background: transparent;">
                             <i class='bx bx-calendar-x' style="font-size: 3.5rem; color: var(--gray-200);"></i>
@@ -214,7 +225,8 @@
                     if (app.status === 'APPROVED') { badgeClass = 'badge-approved'; statusClass = 'approved'; }
                     if (app.status === 'REJECTED') { badgeClass = 'badge-rejected'; statusClass = 'rejected'; }
 
-                    const initials = app.patientName.split(' ').map(n => n[0]).join('').toUpperCase();
+                    const nameStr = app.patientName || 'Unknown';
+                    const initials = nameStr.split(' ').map(n => n[0]).filter(Boolean).join('').toUpperCase().substring(0, 2);
 
                     let actionsHtml = '';
                     if (app.status === 'PENDING') {
@@ -275,6 +287,10 @@
         }
 
         async function updateStatus(appId, status) {
+            // Disable both action buttons on the card to prevent double-click
+            const allBtns = document.querySelectorAll(`[onclick*="updateStatus(${appId},"]`);
+            allBtns.forEach(b => { b.disabled = true; b.style.opacity = '0.6'; });
+
             try {
                 const response = await fetch(`/api/appointments/${appId}/status`, {
                     method: 'PUT',
@@ -284,13 +300,17 @@
                     },
                     body: JSON.stringify({ status })
                 });
+                if (handleAuthError(response.status)) return;
                 if (response.ok) {
                     fetchRequests();
                 } else {
-                    alert('Error updating status');
+                    const data = await response.json();
+                    alert(data.error || 'Error updating status');
+                    allBtns.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
                 }
             } catch (err) {
-                alert('Server error');
+                alert('Server error. Please try again.');
+                allBtns.forEach(b => { b.disabled = false; b.style.opacity = '1'; });
             }
         }
 

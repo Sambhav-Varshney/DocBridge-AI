@@ -3,7 +3,8 @@
  * Shows users, doctors, and appointments with date validation status.
  */
 const sqlite3 = require('sqlite3').verbose();
-const db = new sqlite3.Database('./database.sqlite');
+const path = require('path');
+const db = new sqlite3.Database(path.join(__dirname, '../database.sqlite'));
 
 function isValidDate(str) {
     if (!str || !/^\d{4}-\d{2}-\d{2}$/.test(str)) return false;
